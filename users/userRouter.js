@@ -18,22 +18,21 @@ router.post('/', validateUser, (req, res) => {
 
 });
 
-// router.post('/:id/posts', (req, res) => {
-// const input = req.body;
-// posts.insert(input)
-// .then( id => {
-//   if(id) {
-//     res.status(201).json({...id, ...input})
-//   } else {
-//     res.status(404).json({error: "a post with the specified ID does not exist"})
-//   }
-// })
-// .catch(error => {
-//   console.log(error)
-//   res.status(500).json({ error: "The post information could not be added" })
-// })
+router.post('/:id/posts', validatePost,  (req, res) => {
+  const id = req.params.id;
+  const text = req.body.text;
+posts.insert({
+  user_id: id, text: text
+})
+.then( posts => {
+ res.status(201).json(posts)
+})
+.catch(error => {
+  console.log(error)
+  res.status(500).json({ error: "The post information could not be added" })
+})
 
-// });
+});
 
 router.get('/', (req, res) => {
   db.get()
@@ -122,7 +121,7 @@ function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
   const body = req.body;
-  if (body.length === 0) {
+  if (!body) {
     res.status(400).json({message: "missing user data"})
   } else if (body.name === "") {
     res.status(400).json({message: "missing required name field"})
@@ -133,7 +132,14 @@ function validateUser(req, res, next) {
 } 
 
 function validatePost(req, res, next) {
-  // do your magic!
+  const body = req.body;
+  if(!body) {
+    res.status(400).json({message: "Missing post data"})
+  } else if (body.text === "") {
+    res.status(400).json({message: "Missing required text field"})
+  } else {
+    next();
+  }
 }
 
 module.exports = router;

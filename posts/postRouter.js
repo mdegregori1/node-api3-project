@@ -16,50 +16,38 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  posts.getById(id) 
-  .then( id => {
-    if(id){
-      res.status(200).json(id)
-    } else {
-      res.status(404).json({message: "Invalid User Id"})
-    }
+
+router.get('/:id', validatePostId, (req, res) => {
+  posts.getById(req.params.id)
+  .then(post => {
+    res.status(200).json(post)
   })
   .catch(error => {
-    console.log(error);
-    res.status(500).json({message: "Error retrieving data"})
+    res.status(500).json({message: "error retrieving posts"})
   })
 });
 
-router.delete('/:id', (req, res) => {
+
+router.delete('/:id', validatePostId, (req, res) => {
   const id = req.params.id;
-  posts.remove(id)
-  .then( id => {
-    if(id) {
-      res.status(200).json({message: "user was deleted successfully"})
-    } else {
-      res.status(400).json({message: "Invalid user id"})
-    }
-  })
-  .catch(error => {
-    console.log(error)
-    res.status(500).json({message: "Error erasing data"})
-  })
+    posts.remove(id)
+    .then( e => {
+        res.status(200).json({message: "The post was successfully deleted."})
+    })
+    .catch(error => {
+        console.log(error)
+        res.status(500).json({ error: "The post could not be removed" })
+    })
 
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validatePostId, (req, res) => {
   const id = req.params.id;
   const input = req.body
   if(input.text){
     posts.update(id, input)
-    .then(id => {
-      if(id) {
-        res.status(200).json({...id, input})
-      } else {
-        res.status(404).json({message: "the post with the specified id does not exist"})
-      }
+    .then( edit=> {
+      res.status(200).json({...edit, ...input})
     })
     .catch(error => {
       console.log(error)
@@ -73,7 +61,15 @@ router.put('/:id', (req, res) => {
 // custom middleware
 
 function validatePostId(req, res, next) {
-  // do your magic!
+  posts.getById(req.params.id)
+  .then(id => {
+    if (id) {
+      req.posts= id;
+      next();
+    } else {
+      res.status(400).json({message: "Invalid User ID"})
+    }
+  })
 }
 
 module.exports = router;

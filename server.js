@@ -20,5 +20,6 @@ function logger(req, res, next) {
 server.use(express.json());
 server.use(logger)
 server.use('/users', userRouter)
+server.use('/post', postRouter)
 
 module.exports = server;

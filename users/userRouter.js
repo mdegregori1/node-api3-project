@@ -77,7 +77,7 @@ router.get('/:id/posts', (req, res) => {
 router.delete('/:id', validateUserId, (req, res) => {
   const id = req.params.id;
     db.remove(id)
-    .then( () => {
+    .then( e => {
         res.status(200).json({message: "The user was successfully deleted."})
     })
     .catch(error => {
@@ -113,11 +113,12 @@ function validateUserId(req, res, next) {
   .then(id => {
     if (id) {
       req.user = id;
+      next();
     } else {
       res.status(400).json({message: "invalid user id"})
     }
   })
-  next();
+
 }
 
 function validateUser(req, res, next) {
